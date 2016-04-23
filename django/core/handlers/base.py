@@ -59,12 +59,10 @@ def handle_uncaught_exception(request, exc_info):
     if settings.DEBUG_PROPAGATE_EXCEPTIONS:
         raise
 
-    logger.error('Internal Server Error: %s', request.path,
+    logger.error(
+        'Internal Server Error: %s', request.path,
         exc_info=exc_info,
-        extra={
-            'status_code': 500,
-            'request': request
-        }
+        extra={'status_code': 500, 'request': request}
     )
 
     if settings.DEBUG:
@@ -86,11 +84,9 @@ class ExceptionMiddleware(object):
         try:
             response = self.get_response(request)
         except http.Http404 as exc:
-            logger.warning('Not Found: %s', request.path,
-                        extra={
-                            'status_code': 404,
-                            'request': request
-                        })
+            logger.warning(
+                'Not Found: %s', request.path,
+                extra={'status_code': 404, 'request': request})
             if settings.DEBUG:
                 response = debug.technical_404_response(request, exc)
             else:
@@ -99,32 +95,25 @@ class ExceptionMiddleware(object):
         except PermissionDenied as exc:
             logger.warning(
                 'Forbidden (Permission denied): %s', request.path,
-                extra={
-                    'status_code': 403,
-                    'request': request
-                })
+                extra={'status_code': 403, 'request': request}
+            )
             response = get_exception_response(request, 403, exc)
 
         except MultiPartParserError as exc:
             logger.warning(
                 'Bad request (Unable to parse request body): %s', request.path,
-                extra={
-                    'status_code': 400,
-                    'request': request
-                })
+                extra={'status_code': 400, 'request': request}
+            )
             response = get_exception_response(request, 400, exc)
 
         except SuspiciousOperation as exc:
             # The request logger receives events for any problematic request
             # The security logger receives events for all SuspiciousOperations
-            security_logger = logging.getLogger('django.security.%s' %
-                            exc.__class__.__name__)
+            security_logger = logging.getLogger('django.security.%s' % exc.__class__.__name__)
             security_logger.error(
                 force_text(exc),
-                extra={
-                    'status_code': 400,
-                    'request': request
-                })
+                extra={'status_code': 400, 'request': request}
+            )
             if settings.DEBUG:
                 return debug.technical_500_response(request, *sys.exc_info(), status_code=400)
 
@@ -271,8 +260,10 @@ class BaseHandler(object):
             else:                                           # CBV
                 view_name = callback.__class__.__name__ + '.__call__'
 
-            raise ValueError("The view %s.%s didn't return an HttpResponse object. It returned None instead."
-                             % (callback.__module__, view_name))
+            raise ValueError(
+                "The view %s.%s didn't return an HttpResponse object. It "
+                "returned None instead." % (callback.__module__, view_name)
+            )
 
         # If the response supports deferred rendering, apply template
         # response middleware and then render the response
@@ -281,9 +272,11 @@ class BaseHandler(object):
                 response = middleware_method(request, response)
                 # Complain if the template response middleware returned None (a common error).
                 if response is None:
-                    raise ValueError("%s.process_template_response didn't return an "
+                    raise ValueError(
+                        "%s.process_template_response didn't return an "
                         "HttpResponse object. It returned None instead."
-                        % (middleware_method.__self__.__class__.__name__))
+                        % (middleware_method.__self__.__class__.__name__)
+                    )
 
             try:
                 response = response.render()
@@ -292,7 +285,6 @@ class BaseHandler(object):
 
         return response
 
-<<<<<<< HEAD
     def handle_uncaught_exception(self, request, exc_info):
         """
         Processing for any otherwise uncaught exceptions (those that will
@@ -323,8 +315,6 @@ class BaseHandler(object):
         callback, param_dict = resolver.resolve_error_handler(500)
         return callback(request, **param_dict)
 
-=======
->>>>>>> Added an exception middleware for feature parity with old style middlewares.
     def apply_response_fixes(self, request, response):
         """
         Applies each of the functions in self.response_fixes to the request and

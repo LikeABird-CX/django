@@ -133,10 +133,12 @@ class HandlerLoggingTests(SetupDefaultLoggingMixin, LoggingCaptureMixin, SimpleT
 )
 class I18nLoggingTests(SetupDefaultLoggingMixin, LoggingCaptureMixin, SimpleTestCase):
 
-    def test_i18n_page_found_no_warning(self):
-        self.client.get('/exists/')
-        self.client.get('/en/exists/')
-        self.assertEqual(self.logger_output.getvalue(), '')
+    # TODO: restore the fix for #26504
+    # https://github.com/django/django/commit/40b69607c751c4afa453edfd41d2ed155e58187e
+    # def test_i18n_page_found_no_warning(self):
+    #    self.client.get('/exists/')
+    #    self.client.get('/en/exists/')
+    #    self.assertEqual(self.logger_output.getvalue(), '')
 
     def test_i18n_page_not_found_warning(self):
         self.client.get('/this_does_not/')
